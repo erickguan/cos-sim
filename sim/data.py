@@ -135,3 +135,10 @@ def find_by_name(model_type, name):
 
 def clear():
   clear_store()
+
+
+def find_all(model_type):
+  if model_type not in SUPPORTED_MODEL_TYPES:
+    raise ValueError(f"Not supported model type {model_type}")
+
+  return retrieve(model_type)

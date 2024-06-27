@@ -1,5 +1,5 @@
 from sim.models import Song, User, FriendList
-from sim.data import save, find, clear, find_by_name
+from sim.data import save, find, clear, find_by_name, find_all
 
 import pytest
 
@@ -114,3 +114,16 @@ def test_find_friend_list():
   friend_list = find("friend_list", 1)
   assert user1 == friend_list.user
   assert [user2] == friend_list.friends
+
+
+def test_find_all():
+  song1 = Song(
+    id_=1, name="Karma", genre="Pop", tempo=100, singer="Taylor Swift", popularity_score=80, release_year=2011
+  )
+  save(song1)
+  song2 = Song(
+    id_=2, name="fortnight", genre="Pop", tempo=100, singer="Taylor Swift", popularity_score=80, release_year=2024
+  )
+  save(song2)
+
+  assert [song1, song2] == find_all("song")
