@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 @dataclass
 class Song:
   id_: int
+  name: str
   genre: str
   tempo: int
   singer: str
@@ -15,6 +16,7 @@ class Song:
 class User:
   id_: int
   username: str
+  name: str
 
   song_ids: list[int] = field(default_factory=list)
   # `data` module maps `sond_ids` to `playlist`.

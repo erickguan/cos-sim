@@ -8,6 +8,7 @@ import re
 
 pattern = re.compile(r"(?<!^)(?=[A-Z])")
 
+SUPPORTED_MODEL_TYPES_FINDABLE_BY_NAME = frozenset(["song", "user"])
 SUPPORTED_MODEL_TYPES = frozenset(["song", "user", "friend_list"])
 OPERATION_SAVE = "save"
 OPERATION_REMOVE = "remove"
@@ -16,6 +17,7 @@ OPERATION_REMOVE = "remove"
 def _index(model_type, instance, operation):
   """Store index of a model"""
 
+  # store id index
   index_key = f"{model_type}_id_index"
 
   # keep index as a hash in the beginning of the list
@@ -27,6 +29,25 @@ def _index(model_type, instance, operation):
   elif operation == OPERATION_REMOVE:
     if instance.id_ in index:
       del index[instance.id_]
+  else:
+    pass  # should not happen
+
+  store(index_key, index)
+
+  # store name index
+  if model_type not in SUPPORTED_MODEL_TYPES_FINDABLE_BY_NAME:
+    return
+  index_key = f"{model_type}_name_index"
+
+  # keep index as a hash in the beginning of the list
+  _index_data = retrieve(index_key)
+  index = _index_data[0] if len(_index_data) > 0 else {}
+
+  if operation == OPERATION_SAVE:
+    index[instance.name] = instance
+  elif operation == OPERATION_REMOVE:
+    if instance.name in index:
+      del index[instance.name]
   else:
     pass  # should not happen
 
@@ -56,7 +77,7 @@ def save(instance):
   _index(model_type, instance, OPERATION_SAVE)
 
 
-def _find_from_index(model_type, id_):
+def _find_from_id_index(model_type, id_):
   index_key = f"{model_type}_id_index"
 
   _index_data = retrieve(index_key)
@@ -65,24 +86,49 @@ def _find_from_index(model_type, id_):
   return index.get(id_)
 
 
-def find(model_type, id_):
-  if model_type not in SUPPORTED_MODEL_TYPES:
-    raise ValueError(f"Not supported model type {model_type}")
+def _find_from_name_index(model_type, name):
+  index_key = f"{model_type}_name_index"
 
-  instance = _find_from_index(model_type, id_)
-  if instance is None:
-    return
+  _index_data = retrieve(index_key)
+  index = _index_data[0] if len(_index_data) > 0 else {}
 
+  return index.get(name)
+
+
+def _build_associations(model_type, instance):
   # Note
   # Because I have only 3 models, I will write the "association" manually.
   if model_type == "user":
     instance.song_ids = list(filter(lambda x: find("song", x), instance.song_ids))
     instance.playlist = list(map(lambda x: find("song", x), instance.song_ids))
-    print(retrieve("song"))
   elif model_type == "friend_list":
     instance.user = find("user", instance.user_id)
     instance.friend_ids = list(filter(lambda x: find("user", x), instance.friend_ids))
     instance.friends = list(map(lambda x: find("user", x), instance.friend_ids))
+
+
+def find(model_type, id_):
+  if model_type not in SUPPORTED_MODEL_TYPES:
+    raise ValueError(f"Not supported model type {model_type}")
+
+  instance = _find_from_id_index(model_type, id_)
+  if instance is None:
+    return
+
+  _build_associations(model_type, instance)
+
+  return instance
+
+
+def find_by_name(model_type, name):
+  if model_type not in SUPPORTED_MODEL_TYPES_FINDABLE_BY_NAME:
+    raise ValueError(f"Not supported model type {model_type}")
+
+  instance = _find_from_name_index(model_type, name)
+  if instance is None:
+    return
+
+  _build_associations(model_type, instance)
 
   return instance
 
