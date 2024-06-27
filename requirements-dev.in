@@ -1,0 +1,4 @@
+ruff
+pytest
+
+-r requirements.in

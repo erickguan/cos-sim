@@ -1,0 +1,43 @@
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+  ".direnv",
+  ".git",
+  ".pytest_cache",
+  ".ruff_cache",
+  ".venv",
+  ".vscode",
+]
+
+# General style
+line-length = 120
+indent-width = 2
+
+# Assume Python version
+target-version = "py311"
+
+# Read more on lint settings https://docs.astral.sh/ruff/settings/#lint
+[tool.ruff.lint]
+# Read more on Rules https://docs.astral.sh/ruff/rules/
+select = [
+  "E", # pycodestyle
+  "F", # Pyflakes rules
+  "UP", # pyupgrade
+  "PERF", # Perflint
+]
+ignore = []
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+# Read more on format settings https://docs.astral.sh/ruff/settings/#format
+[tool.ruff.format]
+# similar to black style
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
