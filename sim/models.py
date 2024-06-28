@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 
 @dataclass
 class Song:
-  id_: int
   name: str
   genre: str
   tempo: int
@@ -11,13 +10,17 @@ class Song:
   popularity_score: int
   release_year: int
 
+  # has to appear later because of default argument
+  id_: int | None = None
+
 
 @dataclass
 class User:
-  id_: int
   username: str
   name: str
 
+  # has to appear later because of default argument
+  id_: int | None = None
   song_ids: list[int] = field(default_factory=list)
   # `data` module maps `sond_ids` to `playlist`.
   # The list might omit song when song doesn't exist or invalid.
@@ -26,8 +29,11 @@ class User:
 
 @dataclass
 class FriendList:
-  id_: int
   user_id: int
+
+  # has to appear later because of default argument
+  id_: int | None = None
+
   # `data` module maps `user_id` to `user`. `None` when user doesn't exist or invalid.
   user: User | None = None
 

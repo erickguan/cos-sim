@@ -64,24 +64,15 @@ def _inflect_class_name(instance):
   return _camel_case_to_smoke_case(type(instance).__name__)
 
 
-def save(instance):
-  if instance is None:
-    raise ValueError("Trying to save a `None` instance")
-
-  model_type = _inflect_class_name(instance)
-
-  if model_type not in SUPPORTED_MODEL_TYPES:
-    raise ValueError(f"Not supported model type {model_type}")
-
-  store(model_type, instance)
-  _index(model_type, instance, OPERATION_SAVE)
-
-
-def _find_from_id_index(model_type, id_):
+def _retrieve_id_index(model_type):
   index_key = f"{model_type}_id_index"
 
   _index_data = retrieve(index_key)
   index = _index_data[0] if len(_index_data) > 0 else {}
+  return index
+
+def _find_from_id_index(model_type, id_):
+  index = _retrieve_id_index(model_type)
 
   return index.get(id_)
 
@@ -94,6 +85,43 @@ def _find_from_name_index(model_type, name):
 
   return index.get(name)
 
+def _validate_unique(model_type, instance):
+  """Raise if uniqueness violation."""
+
+  if model_type not in SUPPORTED_MODEL_TYPES:
+    raise ValueError(f"Not supported model type {model_type}")
+
+  if _find_from_id_index(model_type, instance.id_) is not None:
+    raise ValueError("Should not have the same id as another object in data store.")
+
+  if model_type in SUPPORTED_MODEL_TYPES_FINDABLE_BY_NAME:
+    if _find_from_name_index(model_type, instance.name) is not None:
+      raise ValueError("Should not have the same name as another object in data store.")
+
+def save(instance):
+  if instance is None:
+    raise ValueError("Trying to save a `None` instance")
+
+  model_type = _inflect_class_name(instance)
+
+  if model_type not in SUPPORTED_MODEL_TYPES:
+    raise ValueError(f"Not supported model type {model_type}")
+  
+  index = _retrieve_id_index(model_type)
+  last_id = max(index.keys() or [0]) # 0 is a sensible default because we only use last_id+1
+  exist_ids = frozenset(index.keys())
+  
+  # overwrite existing id
+  if (instance.id_ in exist_ids or
+      # arbitrary. assume id starts with 1
+      instance.id_ is None or
+      instance.id_ < 1):
+    instance.id_ = last_id + 1
+  
+  _validate_unique(model_type, instance)
+
+  store(model_type, instance)
+  _index(model_type, instance, OPERATION_SAVE)
 
 def _build_associations(model_type, instance):
   # Note

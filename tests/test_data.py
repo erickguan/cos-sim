@@ -127,3 +127,41 @@ def test_find_all():
   save(song2)
 
   assert [song1, song2] == find_all("song")
+
+def test_save_set_id():
+  song = Song(
+    name="Karma", genre="Pop", tempo=100, singer="Taylor Swift", popularity_score=80, release_year=2011
+  )
+  save(song)
+
+  song = find_all('song')[-1]
+  assert 1 == song.id_
+  assert "Karma" == song.name
+
+
+def test_save_do_not_overwrite_id():
+  song1 = Song(
+    id_=1, name="Karma", genre="Pop", tempo=100, singer="Taylor Swift", popularity_score=80, release_year=2011
+  )
+  save(song1)
+  song2 = Song(
+    id_=1, name="fortnight", genre="Pop", tempo=100, singer="Taylor Swift", popularity_score=80, release_year=2011
+  )
+  save(song2)
+
+  song = find_all('song')[-1]
+  assert 2 == song.id_
+  assert "fortnight" == song.name
+
+
+def test_save_raise_with_same_name():
+  song1 = Song(
+    name="Karma", genre="Pop", tempo=100, singer="Taylor Swift", popularity_score=80, release_year=2011
+  )
+  save(song1)
+  song2 = Song(
+    name="Karma", genre="Pop", tempo=100, singer="Taylor Swift", popularity_score=80, release_year=2011
+  )
+
+  with pytest.raises(ValueError):
+    save(song2)
