@@ -2,7 +2,7 @@
 
 from sim.models import Song, User, FriendList
 from sim.data import save, find_by_name, find_all
-from sim.song_recommendation import recommend_songs
+from sim.song_recommendation import recommend_songs, recommend_songs_social
 
 
 # When accept dictionary to create a model, use a simplified sets of attributes
@@ -110,3 +110,11 @@ def show_song_recommendations(user: User, top_n=5, method: str = "average") -> l
   possible_songs = list(filter(lambda x: x.id_ not in user.song_ids, songs))
 
   return recommend_songs(user.playlist, possible_songs, top_n=top_n, method=method)
+
+
+def show_song_recommendations_social(user: User, top_n=5) -> list[Song]:
+  songs = find_all("song")
+  possible_songs = list(filter(lambda x: x.id_ not in user.song_ids, songs))
+  friend_list = find_by_name("friend_list", user.name)
+
+  return recommend_songs_social(user.playlist, possible_songs, friend_list.friends, top_n=top_n)

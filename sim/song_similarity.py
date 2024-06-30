@@ -1,3 +1,5 @@
+"""Policies for song recommendations"""
+
 from dataclasses import fields
 
 # a whitelist for song's similarity fields
@@ -14,3 +16,8 @@ def calculate_similarity_index(song1, song2):
   )
   total_attributes = len(list(filter(lambda x: x.name in SONG_SIMILARITY_FIELDS, fields(song1))))
   return same_attributes / total_attributes
+
+
+def calculate_friend_similarity_index(song, user_friends):
+  total_presence = sum(1 for user in user_friends if song in user.playlist)
+  return total_presence / len(user_friends)

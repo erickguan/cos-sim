@@ -3,9 +3,9 @@ from pprint import pp
 
 song_attrs = [
   {"name": "Blinding Lights", "genre": "Pop", "tempo": 171, "singer": "The Weeknd", "popularity_score": 95, "release_year": 2019},
-  {"name": "Watermelon Sugar", "genre": "Pop", "tempo": 98, "singer": "Harry Styles", "popularity_score": 93, "release_year": 2019},
+  {"name": "Watermelon Sugar", "genre": "Pop", "tempo": 95, "singer": "Harry Styles", "popularity_score": 93, "release_year": 2019},
   {"name": "Dance Monkey", "genre": "Pop", "tempo": 98, "singer": "Tones and I", "popularity_score": 92, "release_year": 2019},
-  {"name": "Circles", "genre": "Hip Hop", "tempo": 120, "singer": "Post Malone", "popularity_score": 92, "release_year": 2019},
+  {"name": "Circles", "genre": "Hip Hop", "tempo": 120, "singer": "Post Malone", "popularity_score": 91, "release_year": 2019},
   {"name": "Don't Start Now", "genre": "Pop", "tempo": 124, "singer": "Dua Lipa", "popularity_score": 94, "release_year": 2019},
   {"name": "Levitating", "genre": "Pop", "tempo": 103, "singer": "Dua Lipa", "popularity_score": 96, "release_year": 2020},
   {"name": "Savage Love", "genre": "Pop", "tempo": 132, "singer": "Jawsh 685, Jason Derulo", "popularity_score": 90, "release_year": 2020},
@@ -17,7 +17,8 @@ song_attrs = [
 songs = [add_song(attr) for attr in song_attrs]
 
 user = add_user({"name": "John", "username": "john"}, ["Dance Monkey", "Rockstar"])
-siri = add_user({"name": "Siri", "username": "siri"})
+siri = add_user({"name": "Siri", "username": "siri"}, ["Life Goes On", "Rockstar", "Peaches"])
+bob = add_user({"name": "Bob", "username": "bob"}, ["Life Goes On", "Rockstar", "Circles"])
 
-add_friend(user, ["Siri"])
-pp(show_song_recommendations(user))
+add_friend(user, ["Siri", "Bob"])
+pp(show_song_recommendations_social(user))
