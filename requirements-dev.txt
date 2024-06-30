@@ -2,25 +2,11 @@
 #    uv pip compile requirements-dev.in
 iniconfig==2.0.0
     # via pytest
-numpy==2.0.0
-    # via
-    #   -r requirements.in
-    #   pandas
 packaging==24.1
     # via pytest
-pandas==2.2.2
-    # via -r requirements.in
 pluggy==1.5.0
     # via pytest
 pytest==8.2.2
     # via -r requirements-dev.in
-python-dateutil==2.9.0.post0
-    # via pandas
-pytz==2024.1
-    # via pandas
 ruff==0.5.0
     # via -r requirements-dev.in
-six==1.16.0
-    # via python-dateutil
-tzdata==2024.1
-    # via pandas
