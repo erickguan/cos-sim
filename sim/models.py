@@ -1,3 +1,12 @@
+"""
+ActiveRecord style models based on dataclass.
+
+Caveat exists such as:
+* associations are set up by data layer.
+* associations needs to be manually constructed.
+* some data validation happens at data layer.
+"""
+
 from dataclasses import dataclass, field
 
 

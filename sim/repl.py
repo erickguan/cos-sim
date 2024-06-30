@@ -48,7 +48,9 @@ def add_user(attrs: dict, playlist: list[str] | None = None) -> User:
 
   for song_name in playlist:
     if song := find_by_name("song", song_name):
-      filtered.song_ids.append(song.id_)
+      if "song_ids" not in filtered:
+        filtered["song_ids"] = []
+      filtered["song_ids"].append(song.id_)
 
   user = User(**filtered)
   save(user)

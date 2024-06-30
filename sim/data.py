@@ -1,4 +1,4 @@
-"""A simple data layer that builds, save models.
+"""A simple data layer that builds, save models and maintain indices.
 
 Of course, use a library is better.
 """
