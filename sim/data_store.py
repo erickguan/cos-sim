@@ -9,6 +9,10 @@ def store(model_type, instance):
   _arena[model_type].append(instance)
 
 
+def overwrite(model_type, data):
+  _arena[model_type] = data
+
+
 def retrieve(model_type):
   return _arena.get(model_type, [])
 

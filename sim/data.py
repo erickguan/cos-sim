@@ -3,13 +3,13 @@
 Of course, use a library is better.
 """
 
-from sim.data_store import store, retrieve, clear_store
+from sim.data_store import store, retrieve, clear_store, overwrite
 import re
 
 pattern = re.compile(r"(?<!^)(?=[A-Z])")
 
-SUPPORTED_MODEL_TYPES_FINDABLE_BY_NAME = frozenset(["song", "user"])
 SUPPORTED_MODEL_TYPES = frozenset(["song", "user", "friend_list"])
+SUPPORTED_MODEL_TYPES_FINDABLE_BY_NAME = SUPPORTED_MODEL_TYPES
 OPERATION_SAVE = "save"
 OPERATION_REMOVE = "remove"
 
@@ -32,7 +32,7 @@ def _index(model_type, instance, operation):
   else:
     pass  # should not happen
 
-  store(index_key, index)
+  overwrite(index_key, [index])
 
   # store name index
   if model_type not in SUPPORTED_MODEL_TYPES_FINDABLE_BY_NAME:
@@ -51,7 +51,7 @@ def _index(model_type, instance, operation):
   else:
     pass  # should not happen
 
-  store(index_key, index)
+  overwrite(index_key, [index])
 
 
 def _camel_case_to_smoke_case(name):
@@ -71,6 +71,7 @@ def _retrieve_id_index(model_type):
   index = _index_data[0] if len(_index_data) > 0 else {}
   return index
 
+
 def _find_from_id_index(model_type, id_):
   index = _retrieve_id_index(model_type)
 
@@ -85,6 +86,7 @@ def _find_from_name_index(model_type, name):
 
   return index.get(name)
 
+
 def _validate_unique(model_type, instance):
   """Raise if uniqueness violation."""
 
@@ -96,7 +98,14 @@ def _validate_unique(model_type, instance):
 
   if model_type in SUPPORTED_MODEL_TYPES_FINDABLE_BY_NAME:
     if _find_from_name_index(model_type, instance.name) is not None:
+      from pprint import pp
+      from sim.data_store import _arena
+
+      pp(_arena)
+      # pp(retrieve("friend_list_id_index"))
+      # pp(retrieve("friend_list_name_index"))
       raise ValueError("Should not have the same name as another object in data store.")
+
 
 def save(instance):
   if instance is None:
@@ -106,22 +115,26 @@ def save(instance):
 
   if model_type not in SUPPORTED_MODEL_TYPES:
     raise ValueError(f"Not supported model type {model_type}")
-  
-  index = _retrieve_id_index(model_type)
-  last_id = max(index.keys() or [0]) # 0 is a sensible default because we only use last_id+1
-  exist_ids = frozenset(index.keys())
-  
-  # overwrite existing id
-  if (instance.id_ in exist_ids or
-      # arbitrary. assume id starts with 1
-      instance.id_ is None or
-      instance.id_ < 1):
-    instance.id_ = last_id + 1
-  
-  _validate_unique(model_type, instance)
 
-  store(model_type, instance)
-  _index(model_type, instance, OPERATION_SAVE)
+  index = _retrieve_id_index(model_type)
+  last_id = max(index.keys() or [0])  # 0 is a sensible default because we only use last_id+1
+  exist_ids = frozenset(index.keys())
+
+  # overwrite id when invalid or not set
+  if instance.id_ is None or instance.id_ not in exist_ids or instance.id_ < 1:
+    instance.id_ = last_id + 1
+    _validate_unique(model_type, instance)
+
+    store(model_type, instance)
+    _index(model_type, instance, OPERATION_SAVE)
+  elif instance.id_ in exist_ids:  # update existing instance
+    instances = retrieve(model_type)
+    for idx, persisted_instance in enumerate(instances):
+      if persisted_instance.id_ == instance.id_:
+        instances[idx] = instance
+        _index(model_type, instance, OPERATION_SAVE)
+        break  # update done, no need to continue
+
 
 def _build_associations(model_type, instance):
   # Note

@@ -30,6 +30,9 @@ class User:
 @dataclass
 class FriendList:
   user_id: int
+  # user's name. This is a hack to reuse "name" index.
+  # I made this to save implementation time for this demo.
+  name: str
 
   # has to appear later because of default argument
   id_: int | None = None
@@ -40,4 +43,6 @@ class FriendList:
   friend_ids: list[int] = field(default_factory=list)
   # `data` module maps `friend_ids` to `friends`.
   # The list might omit users when user doesn't exist or invalid.
+  #
+  # assume friends are bidirectional and user can't choose not to have a friend
   friends: list[User] = field(default_factory=list)
