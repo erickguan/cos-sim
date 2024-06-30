@@ -1,5 +1,5 @@
 from sim.models import Song, User
-from sim.repl import add_song, add_user, add_friend
+from sim.repl import add_song, add_user, add_friend, show_song_recommendations
 from sim.data import clear, find_by_name, save
 
 import pytest
@@ -29,6 +29,10 @@ def setup_songs():
     id_=2, name="fortnight", genre="Pop", tempo=100, singer="Taylor Swift", popularity_score=80, release_year=2024
   )
   save(song2)
+  song3 = Song(
+    id_=3, name="Song For The Lonely", genre="Pop", tempo=100, singer="Cher", popularity_score=10, release_year=2024
+  )
+  save(song3)
 
 
 @pytest.fixture(name="users")
@@ -41,6 +45,23 @@ def setup_users():
   save(user2)
   user3 = User(id_=3, username="bob", name="Bob")
   save(user3)
+
+
+@pytest.fixture(name="users_and_songs")
+def setup_users_and_songs(users, songs):
+  """Fixture to create a few users and songs"""
+
+  john = find_by_name("user", "John")
+  john.song_ids = [1, 2, 3]
+  save(john)
+
+  siri = find_by_name("user", "Siri")
+  siri.song_ids = [1]
+  save(siri)
+
+  bob = find_by_name("user", "Bob")
+  bob.song_ids = [2]
+  save(bob)
 
 
 def test_add_song():
@@ -174,3 +195,23 @@ def test_add_friend_persists_bidirectional(users):
   assert [john, bob] == siri_friend_list.friends
   bob_friend_list = find_by_name("friend_list", "Bob")
   assert [john, siri] == bob_friend_list.friends
+
+
+def test_show_song_recommendations_no_more_songs(users_and_songs):
+  john = find_by_name("user", "John")
+
+  assert [] == show_song_recommendations(john)
+
+
+def test_show_song_recommendations_recommends(users_and_songs):
+  siri = find_by_name("user", "Siri")
+
+  assert [find_by_name("song", "fortnight"), find_by_name("song", "Song For The Lonely")] == show_song_recommendations(
+    siri
+  )
+
+
+def test_show_song_recommendations_recommends_relevance(users_and_songs):
+  siri = find_by_name("user", "Siri")
+
+  assert [find_by_name("song", "fortnight")] == show_song_recommendations(siri, top_n=1)

@@ -1,7 +1,8 @@
 """Helpers to either demo in REPL or utility functions"""
 
 from sim.models import Song, User, FriendList
-from sim.data import save, find_by_name
+from sim.data import save, find_by_name, find_all
+from sim.song_recommendation import recommend_songs
 
 
 # When accept dictionary to create a model, use a simplified sets of attributes
@@ -102,5 +103,8 @@ def add_friend(user: User, friends: list[str]) -> (User, list[User]):
   return [user, collated_friends]
 
 
-def show_song_recommendations(user: User) -> list[Song]:
-  pass
+def show_song_recommendations(user: User, top_n=5, method: str = "average") -> list[Song]:
+  songs = find_all("song")
+  possible_songs = list(filter(lambda x: x.id_ not in user.song_ids, songs))
+
+  return recommend_songs(user.playlist, possible_songs, top_n=top_n, method=method)
